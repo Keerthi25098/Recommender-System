@@ -1,3 +1,12 @@
+                            
+
+2-----https::github.com/sumantrapatnaik/FeatureEngineeringInPySpark/blob/master/Train_UWu5bXk.csv
+     FactorAnalysis----bioChemist.csv
+     svd-image
+3-----naive--https::www.kaggle.com/datasets/itssuru/loan_data
+    RULEbased--https:://github.com/nfzaltay/rules_based_classification/tree/main/data
+4------https::s3-us-west-2--amazonaws.com/recommend_tutorial/ratings.csv
+                            
                             1----MISSING VALUES
 
 import pandas as pd
