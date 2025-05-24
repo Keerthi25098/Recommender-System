@@ -1,0 +1,19 @@
+                            1----MISSING VALUES
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from google.colab import drive
+drive.mount('/content/gdrive')
+# Load the dataset
+train = pd.read_csv('/content/Train_UWu5bXk.csv')
+print((train.isnull().sum()/len(train))*100)
+
+Variables = train.columns
+variable = []
+for i in range(1,12):
+    if a variable[i]>=20:
+        #setting the threshold as 20%
+        variable.append(variables[i])
+print(variables)
+print(variable)
