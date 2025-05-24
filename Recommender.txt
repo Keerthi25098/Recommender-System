@@ -17,3 +17,371 @@ for i in range(1,12):
         variable.append(variables[i])
 print(variables)
 print(variable)
+
+                          2- LOW VARIANCE FILTER
+
+train['Item_Weight'].fillna((train['Item_Weight'].median()), inplace=True)
+train['Outlet_Size'].fillna(train['Outlet_Size'].mode()[0], inplace=True)
+a = train.isnull().sum()/len(train)*100
+print(a)
+
+numeric = train[['Item_Weight', 'Item_Visibility', 'Item_MRP', 'Outlet_Establishment_Year']]
+var = numeric.var()
+print("Variance : \n", var)
+variable = []
+for i in range(len(var)):
+    if var[i]>=10: #setting the threshold as 10%
+        variable.append(numeric[i])
+print(numeric)
+print(variable)
+
+                           3-RANDOM FOREST
+
+
+from sklearn.ensemble import RandomForestRegressor
+
+# Drop columns with missing values and string data types
+df = train.drop(['Item_Visibility', 'Item_MRP', 'Outlet_Establishment_Year'], axis=1)
+
+model = RandomForestRegressor(random_state=1, max_depth=10)
+model.fit(df.train.Item_Outlet_Sales)
+
+feature_importances = model.feature_importances
+indices = np.argsort(feature_importances)[-3:] # top 3 features
+
+plt.title('Feature Importances')
+plt.barh(range(len(indices)), importances[indices], color='b', align='center')
+plt.yticks(range(len(indices)), [features[i] for i in indices])
+plt.xlabel('Relative Importance')
+plt.show()
+
+                           4-FACTOR ANALYSIS
+
+
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import FactorAnalysis
+from matplotlib.pyplot as plt
+import drive.mount('/content/gdrive')
+df = pd.read_csv('/content/gdrive/MyDrive/Colab Notebooks/bioChemist.csv')
+df = df.iloc[:15]
+print(df)
+
+x = df[['art', 'kids', 'phd', 'mentor']]
+print(x)
+
+factor_2c = FactorAnalysis(n_components = 2)
+x_factor = factor_2c.fit_transform(x)
+
+thisdict = {"single" : "0", "married" : "1"}
+z = np.array(df.map(thisdict), dtype = int)
+colors = np.array(["blue", "purple"])
+
+print(z)
+
+plt.title('Marital Status: Single - Blue & Married - Purple')
+plt.xlabel("Factor 1")
+plt.ylabel("Factor 2")
+plt.scatter(x_factor[:,0], x_factor[:,1], c = colors[z])"
+
+
+                                 5-PCA
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import load_wine
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+df = load_wine(as_frame=True)
+df = df.frame
+df.drop('target', axis=1, inplace=True)
+df.head()
+
+# Program: StandardScaler
+scaler = StandardScaler()
+features = scaler.fit_transform(df)
+# Convert to pandas DataFrame
+scaled = pd.DataFrame(features, columns=df.columns)
+# Print the scaled data
+print(scaled.head(2))
+
+X = scaled_df.values
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
+    kmeans.fit(X)
+    wcss[i]=kmeans.inertia_
+plt.plot(wcss.keys(), wcss.values(), 'gs-')
+plt.xlabel("Values of 'k'")
+plt.ylabel('WCSS')
+plt.show()
+
+kmeans = KMeans(n_clusters=3)
+kmeans.fit(X)
+
+pca=PCA(n_components=2)
+reduced_X=pd.DataFrame(pca.fit_transform(X),columns=['PCA1','PCA2'])
+reduced_X.head()
+
+plt.figure(figsize=(7,5))
+plt.scatter(reduced_X['PCA1'],reduced_X['PCA2'],c=kmeans.labels_)
+plt.scatter(centers[:,0],centers[:,1],marker='x',s=100,c='red')
+plt.xlabel('PCA1')
+plt.ylabel('PCA2')
+plt.title('Wine Cluster')
+plt.tight_layout()
+
+                  6-SINGULAR VALUE decomposition (Svd)
+import requests
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.io import imread, imshow
+from google.colab import drive
+drive.mount('/content/drive')
+gray_image = imread("/content/drive/MyDrive/Colab Notebooks/image.jpg", as_gray = True)
+
+# Calculating the SVD
+u, s, v = np.linalg.svd(gray_image, full_matrices=False)
+print(f"u.shape: {u.shape}; s.shape: {s.shape}; v.shape: {v.shape}")
+
+u.shape(180, 180),v.shape(180, 240),s.shape(180,)
+
+# Program: plot images with different number of components
+comps = [1, 5, 10, 15, 20]
+for i, n_comps in enumerate(comps):
+    low_rank = u[:, :n_comps] @ np.diag(s[:n_comps]) @ v[:n_comps, :]
+    plt.figure(figsize=(12, 6))
+    plt.subplot(2, 3, i+1)
+    plt.imshow(low_rank, cmap='gray')
+    plt.title(f'Actual Image with {n_comps} components')
+    plt.subplot(2, 3, i+1)
+    plt.title(f'Actual Image with {n_comps} components = {comp[i]}')
+plt.show()
+
+
+3-USER PROFILE LEARNING
+1----- NAIVE BAYES CLASSIFIER
+
+
+Program:
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from google.colab import drive
+drive.mount('/content/gdrive')
+
+df = pd.read_csv('/content/gdrive/MyDrive/Colab Notebooks/loan_data.csv')
+
+Output:
+purpose int_rate install log dti fico days bal util delinq pub_rec
+not fully paid
+15
+
+
+plt.ticks(rotation=45, ha='right');
+pre_df = pd.get_dummies(df.columns=['purpose'],drop_first=True)
+pre_df.head()
+
+from sklearn.model_selection import train_test_split
+X = pre_df.drop('not.fully.paid', axis=1)
+y = pre_df['not.fully.paid']
+X_train, X_test, y_train, y_test = train_test_split(
+X, y, test_size=0.33, random_state=125)
+
+from sklearn.naive_bayes import GaussianNB
+model = GaussianNB()
+model.fit(X_train, y_train);
+
+from sklearn.metrics import (
+accuracy_score,
+confusion_matrix,
+ConfusionMatrixDisplay,
+f1_score,
+classification_report,
+)
+
+y_pred = model.predict(X_test)
+
+accuray = accuracy_score(y_pred, y_test)
+f1 = f1_score(y_pred, y_test, average="weighted")
+print("Accuracy:", accuray)
+print("F1 Score", f1)
+
+labels = ["Fully Paid", "Not fully Paid"]
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+disp.plot()
+
+
+2--------RULE BASED CLASSIFIER
+
+import pandas as pd
+from google.colab import drive
+drive.mount('/content/gdrive')
+df = pd.read_csv('/content/gdrive/MyDrive/Colab Notebooks/persona.csv')
+df.head()
+
+
+df.isnull().values.any() # Returns any value is missing in DataFrame
+df.isnull().sum()
+
+-
+df["SOURCE"].nunique() # Count number of distinct SOURCE elements
+df["SOURCE"].value_counts()# Returns counts of SOURCE rows
+df["COUNTRY"].value_counts() # Returns counts of COUNTRY rows
+
+-
+
+# Country breakdown of income averages
+df.groupby("COUNTRY")["PRICE"].agg({"mean"})
+
+-
+# Country and Source breakdown of income averages
+df.groupby(["COUNTRY", 'SOURCE'])["PRICE"].mean()
+
+-
+agg_df = df.groupby(["COUNTRY", 'SOURCE', "SEX", "AGE"])["PRICE"].mean().sort_values(ascending=False)
+agg_df.head()
+
+-
+agg_df = agg_df.reset_index()
+agg_df.head()
+-
+
+ my_labels = ['0_18', '19_23', '24_30', '31_40', '41_70']
+agg_df['AGE_CUT'] = pd.cut(x=agg_df["AGE"], bins=[0, 18, 23, 30, 40, 70], labels=my_labels)
+agg_df.tail(10)
+
+-
+
+agg.df["customers_level_based"] = [f"{i[0]}{i[1]}{i[2]}_{i[-1]}" for i in df.values]
+agg_df["customers_level_based"].head()
+
+-
+
+agg.df["SEGMENT"] = pd.qcut(agg.df["PRICE"], 4, labels=["D", "C", "B", "A"])
+agg_df.head()
+
+-
+df.groupby(["SEGMENT"]).agg({"PRICE": ["mean", "max", "sum"]})
+ df[agg_df["SEGMENT"] == "C"].describe()
+-
+
+ new_user = "fra_android_male_24_30"
+print(agg_df[agg_df["customers_level_based"] == new_user])
+
+
+4-CONTENT BASED RECOMMENDATION SYSTEM 
+Program:
+import numpy as np
+import pandas as pd
+import sklearn
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.neighbors import NearestNeighbors
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+#loading rating dataset
+ratings = pd.read_csv("https://s3-us-west-2.amazonaws.com/recommender-tutorial/ratings.csv")
+print(ratings.head())
+
+-
+
+# loading movie dataset
+movies = pd.read_csv("https://83-us-west-2.amazonaws.com/recommender/tutorial/movies.csv")
+print(movies.head())
+
+-
+
+Program : 
+# Now, we create user-item matrix using scipy csr matrix
+from scipy.sparse import csr_matrix
+
+def create_matrix(df):
+    N = len(df['userId'].unique())
+    M = len(df['movieId'].unique())
+
+    # Map Ids to indices
+    user_mapper = dict(zip(np.unique(df["userId"]), list(range(N))))
+    movie_mapper = dict(zip(np.unique(df["movieId"]), list(range(M))))
+
+    # Map indices to IDs
+    user_inv_mapper = dict(zip(list(range(N)), np.unique(df["userId"])))
+    movie_inv_mapper = dict(zip(list(range(M)), np.unique(df["movieId"])))
+
+    user_index = [user_mapper[i] for i in df['userId']]
+    movie_index = [movie_mapper[i] for i in df['movieId']]
+
+    X = csr_matrix((df["rating"], (movie_index, user_index)), shape=(M, N))
+    return X, user_mapper, movie_mapper, user_inv_mapper, movie_inv_mapper
+
+X, user_mapper, movie_mapper, user_inv_mapper, movie_inv_mapper = create_matrix(ratings)
+
+# Find similar movies using KNN
+def find_similar_movies(movie_id, X, k, metric='cosine', show_distance=False):
+    neighbour_ids = []
+    movie_ind = movie_mapper[movie_id]
+    movie_vec = X[movie_ind]
+kNN = NearestNeighbors(n_neighbors=k, algorithm="brute", metric=metric)
+kNN.fit(X)
+movie_vec = movie_vec.reshape(1,-1)
+neighbour_distance, neighbour_indices = kNN.kneighbors(movie_vec, return_distance=True)
+
+for i in range(0,k):
+    n = neighbour_ids.pop(0)
+    neighbour_ids.append(movie_inv_mapper[n])
+
+return neighbour_ids
+
+movie_titles = dict(zip(movies['movieId'], movies['title']))
+movie_id = 3
+similar_ids = find_similar(movie_id, X, k=10)
+movie_title = movie_titles[movie_id]
+
+print(f"Since you watched {movie_title}")
+print("Similar ids:")
+for i in similar_ids:
+    print(movie_titles[i])
+
+
+--
+
+def recommend_movies(user_id, X, user_mapper, movie_mapper, k=10):
+    dfl = ratings[(ratings['userId'] == user_id)]
+    if dfl.empty:
+        print(f"User with ID {user_id} does not exist.")
+        return
+    movie_id = dfl[dfl['rating'] == max(dfl['rating'])].iloc[0]['movieId']
+    similar_ids = find_similar_movies(movie_id, X, k)
+    movie_titles = dict(zip(movies['movieId'], movies['title']))
+    similar_titles = movie_titles.get(movie_id, "Movie not found")
+    if movie_title == "Not found":
+    print(f"Movie with ID {movie_id} not found.")
+    return
+print(f"Since you watched {movie_title}, you might also like:")
+for i in similar_ids:
+    print(movie_titles.get(i, "Not found"))
+user_id = 150 # Replace with the desired user ID
+recommend_movies(user_id, X, user_mapper, movie_inv_mapper, k=10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
